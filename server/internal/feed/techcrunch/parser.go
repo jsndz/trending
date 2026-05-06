@@ -4,13 +4,32 @@ import (
 	"encoding/xml"
 	"time"
 
+	"github.com/jsndz/trending/internal/feed"
 	"github.com/jsndz/trending/internal/model"
 	"github.com/jsndz/trending/pkg/util"
 )
 
-func Parser(data []byte) (*[]model.Article, error) {
+type TechCrunch struct {
+	URL string
+}
+
+func NewTechCrunch() *TechCrunch {
+	return &TechCrunch{
+		URL: "https://techcrunch.com/feed/",
+	}
+}
+
+func (t *TechCrunch) GetSource() model.Source {
+	return model.SourceTechCrunch
+}
+
+func (t *TechCrunch) Parser() (*[]model.Article, error) {
+	data, err := feed.Fetch(t.URL)
+	if err != nil {
+		return nil, err
+	}
 	var rss RSS
-	err := xml.Unmarshal(data, &rss)
+	err = xml.Unmarshal(data, &rss)
 	if err != nil {
 		return nil, err
 	}

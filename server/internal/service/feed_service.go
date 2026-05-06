@@ -1,35 +1,24 @@
 package service
 
 import (
-	"io"
-	"net/http"
-
-	"github.com/jsndz/trending/internal/feed/techcrunch"
+	"github.com/jsndz/trending/internal/feed"
 	"github.com/jsndz/trending/internal/repository"
 )
 
 type FeedService struct {
 	ArticlesRepo *repository.ArticlesRepository
+	Provider     feed.Provider
 }
 
-func NewFeedSeervice(articleRepo *repository.ArticlesRepository) *FeedService {
+func NewFeedSeervice(articleRepo *repository.ArticlesRepository, provider feed.Provider) *FeedService {
 	return &FeedService{
 		ArticlesRepo: articleRepo,
+		Provider:     provider,
 	}
 }
 
 func (s *FeedService) SyncFeed() error {
-	resp, err := http.Get("https://techcrunch.com/feed/")
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	articles, err := techcrunch.Parser(data)
+	articles, err := s.Provider.Parser()
 	if err != nil {
 		return err
 	}
