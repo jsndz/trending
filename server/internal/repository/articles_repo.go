@@ -1,0 +1,36 @@
+package repository
+
+import (
+	"github.com/jsndz/trending/internal/model"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+type ArticlesRepository struct {
+	db *gorm.DB
+}
+
+func NewArticlesRepository(db *gorm.DB) *ArticlesRepository {
+	return &ArticlesRepository{
+		db: db,
+	}
+}
+
+func (r *ArticlesRepository) Create(article *model.Article) error {
+	return r.db.Create(article).Error
+}
+
+func (r *ArticlesRepository) Get(id string) (*model.Article, error) {
+	var article model.Article
+	err := r.db.First(&article, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &article, nil
+}
+
+func (r *ArticlesRepository) BatchCreate(articles *[]model.Article) error {
+	return r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "link"}},
+		DoNothing: true}).CreateInBatches(articles, len(*articles)).Error
+}
