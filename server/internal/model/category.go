@@ -9,8 +9,8 @@ import (
 )
 
 type Category struct {
-	ID   string `gorm:"primaryKey;size:26"`
-	Name string `gorm:"notNull"`
+	ID   string `gorm:"primaryKey;size:26" json:"id"`
+	Name string `gorm:"notNull" json:"name"`
 }
 
 func (c *Category) BeforeCreate(tx *gorm.DB) error {

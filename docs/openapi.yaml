@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: Trending API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /ping:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Pong response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+  /api/v1/articles:
+    get:
+      summary: List articles
+      responses:
+        "200":
+          description: Articles list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ULID
+        title:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        link:
+          type: string
+        author:
+          type: string
+          nullable: true
+        category:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        description:
+          type: string
+          nullable: true
+        source:
+          type: string
+          enum:
+            - techcrunch
+            - hackernews
+            - reuters
+            - bbc
+      required:
+        - id
+        - title
+        - publishedAt
+        - link
+        - category
+        - source
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ULID
+        name:
+          type: string
+      required:
+        - id
+        - name
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

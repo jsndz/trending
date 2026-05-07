@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"github.com/jsndz/trending/internal/feed/techcrunch"
+	"github.com/jsndz/trending/internal/handler"
 	"github.com/jsndz/trending/internal/repository"
 	"github.com/jsndz/trending/internal/service"
 	"gorm.io/gorm"
@@ -10,6 +11,9 @@ import (
 type Worker struct {
 	FeedService *service.FeedService
 }
+type API struct {
+	ArticleHandler *handler.ArticleHandler
+}
 
 func InitWorker(db *gorm.DB) *Worker {
 	articlesRepo := repository.NewArticlesRepository(db)
@@ -17,5 +21,14 @@ func InitWorker(db *gorm.DB) *Worker {
 	feedService := service.NewFeedSeervice(articlesRepo, techcrunchProvider)
 	return &Worker{
 		FeedService: feedService,
+	}
+}
+
+func InitAPI(db *gorm.DB) *API {
+	articlesRepo := repository.NewArticlesRepository(db)
+	articleService := service.NewArticleService(articlesRepo)
+	articleHandler := handler.NewArticleHandler(articleService)
+	return &API{
+		ArticleHandler: articleHandler,
 	}
 }

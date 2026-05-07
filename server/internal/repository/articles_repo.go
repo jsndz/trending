@@ -22,7 +22,7 @@ func (r *ArticlesRepository) Create(article *model.Article) error {
 
 func (r *ArticlesRepository) Get(id string) (*model.Article, error) {
 	var article model.Article
-	err := r.db.First(&article, id).Error
+	err := r.db.Preload("Category").First(&article, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -33,4 +33,13 @@ func (r *ArticlesRepository) BatchCreate(articles *[]model.Article) error {
 	return r.db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "link"}},
 		DoNothing: true}).CreateInBatches(articles, len(*articles)).Error
+}
+
+func (r *ArticlesRepository) GetAll() ([]model.Article, error) {
+	var articles []model.Article
+	err := r.db.Preload("Category").Find(&articles).Error
+	if err != nil {
+		return nil, err
+	}
+	return articles, nil
 }

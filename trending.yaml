@@ -1,0 +1,32 @@
+version: 1
+name: trending
+tasks:
+  run.scheduler:
+    folder: /home/jaison/code/projects/trending/server
+    command: go run cmd/worker/main.go
+    type: service
+    ready:
+      kind: log
+      match: WORKER RUNNING
+      isRegex: false
+    dependsOn:
+      - run.docker
+    logRules: []
+  run.docker:
+    folder: /home/jaison/code/projects/trending/server
+    command: docker compose up -d
+    type: job
+    ready:
+      kind: exit
+    dependsOn: []
+    logRules: []
+  run.api:
+    folder: /home/jaison/code/projects/trending/server
+    command: go run cmd/api/main.go
+    type: service
+    ready:
+      kind: port
+      port: 8080
+    dependsOn:
+      - run.docker
+    logRules: []
