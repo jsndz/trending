@@ -24,7 +24,7 @@ func (h *ArticleHandler) GetArticles(c *gin.Context) {
 		page = 1
 	}
 
-	if limit < 1 || limit > 100 {
+	if limit < 1 {
 		limit = 10
 	}
 	articles, err := h.ArticleService.GetArticles(page, limit)

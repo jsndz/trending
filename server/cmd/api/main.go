@@ -23,20 +23,19 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
-
 	cfg := config.Load()
 	database, err := db.InitDB(cfg.DBConnectURL)
 	db.MigrateDB(database)
 	if err != nil {
 		panic(err)
 	}
-	_ = redis.NewRedisClient()
+	redisClient := redis.NewRedisClient()
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
-	app := bootstrap.InitAPI(database)
+	app := bootstrap.InitAPI(database, redisClient)
 	api := router.Group("/api/v1")
 	api.GET("/articles", app.ArticleHandler.GetArticles)
 	router.Run(":8080")

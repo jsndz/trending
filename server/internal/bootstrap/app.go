@@ -5,6 +5,7 @@ import (
 	"github.com/jsndz/trending/internal/handler"
 	"github.com/jsndz/trending/internal/repository"
 	"github.com/jsndz/trending/internal/service"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +25,7 @@ func InitWorker(db *gorm.DB) *Worker {
 	}
 }
 
-func InitAPI(db *gorm.DB) *API {
+func InitAPI(db *gorm.DB, redis *redis.Client) *API {
 	articlesRepo := repository.NewArticlesRepository(db)
 	articleService := service.NewArticleService(articlesRepo)
 	articleHandler := handler.NewArticleHandler(articleService)
