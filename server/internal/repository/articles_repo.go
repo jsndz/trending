@@ -46,6 +46,6 @@ func (r *ArticlesRepository) GetAll() ([]model.Article, error) {
 
 func (r *ArticlesRepository) GetPaginated(limit, offset int) ([]model.Article, error) {
 	var articles []model.Article
-	err := r.db.Preload("Category").Limit(limit).Offset(offset).Find(&articles).Error
+	err := r.db.Preload("Category").Limit(limit + 1).Offset(offset).Find(&articles).Error
 	return articles, err
 }

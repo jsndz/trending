@@ -1,33 +1,8 @@
-package service
+Cache Aside:
+If exist in cache get 
+else get from DB and update
 
-import (
-	"context"
-	"encoding/json"
-	"strconv"
-	"time"
-
-	"github.com/jsndz/trending/internal/model"
-	"github.com/jsndz/trending/internal/repository"
-	"github.com/redis/go-redis/v9"
-)
-
-type ArticleService struct {
-	ArticlesRepo *repository.ArticlesRepository
-	redis        *redis.Client
-}
-
-type StoreData struct {
-	Data       []model.Article `json:"data"`
-	NextOffset int             `json:"next_offset"`
-	HasMore    bool            `json:"has_more"`
-}
-
-func NewArticleService(articleRepo *repository.ArticlesRepository, redis *redis.Client) *ArticleService {
-	return &ArticleService{
-		ArticlesRepo: articleRepo,
-		redis:        redis,
-	}
-}
+```go
 
 func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) ([]model.Article, error) {
 	offset := (page - 1) * limit
@@ -63,3 +38,6 @@ func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) (
 
 	return articlesCache.Data, nil
 }
+
+
+```

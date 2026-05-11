@@ -27,7 +27,7 @@ func (h *ArticleHandler) GetArticles(c *gin.Context) {
 	if limit < 1 {
 		limit = 10
 	}
-	articles, err := h.ArticleService.GetArticles(page, limit)
+	articles, err := h.ArticleService.GetArticles(c.Request.Context(), page, limit)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

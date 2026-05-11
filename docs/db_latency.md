@@ -39,3 +39,16 @@ Running 30s test @ http://localhost:8080/api/v1/articles
   286040 requests in 30.02s, 1.40GB read
 Requests/sec:   9527.49
 Transfer/sec:     47.65MB
+
+
+Next implemented Cache aside redis caching
+
+ wrk -t4 -c100 -d30s http://localhost:8080/api/v1/articles
+Running 30s test @ http://localhost:8080/api/v1/articles
+  4 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     4.98ms    3.00ms  99.91ms   90.05%
+    Req/Sec     5.13k   333.34     5.65k    90.58%
+  612831 requests in 30.02s, 2.99GB read
+Requests/sec:  20410.78
+Transfer/sec:    102.08MB

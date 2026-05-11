@@ -27,7 +27,7 @@ func InitWorker(db *gorm.DB) *Worker {
 
 func InitAPI(db *gorm.DB, redis *redis.Client) *API {
 	articlesRepo := repository.NewArticlesRepository(db)
-	articleService := service.NewArticleService(articlesRepo)
+	articleService := service.NewArticleService(articlesRepo, redis)
 	articleHandler := handler.NewArticleHandler(articleService)
 	return &API{
 		ArticleHandler: articleHandler,
