@@ -70,8 +70,3 @@ main need of this is to reduce load on DB
 
 
 
-TLL Jitter:
-
-Add jitter for expiry
-Many different keys
-expiring simultaneously

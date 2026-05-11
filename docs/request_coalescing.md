@@ -87,8 +87,12 @@ TTL jitter
 when one request is doing the db request others have to wait
 we are using retry with exponential backoff + jitter
 
+Add jitter for expiry
+Many different keys
+expiring simultaneously
 
-Negative caching 
+Negative caching:
+
 if data does not exist on DB and malicous attacker request that data again and again 
 so cache will call DB and too many can hit
 so if the record is not found cache is as null
@@ -97,3 +101,6 @@ usually has low ttl like 5sec since the status of data might change
 like does not exist -> exist
 
 
+Invalidation:
+
+invalidate cache when new data is uploaded
