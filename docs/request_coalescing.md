@@ -83,5 +83,17 @@ func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) (
 
 ```
 
+TTL jitter
 when one request is doing the db request others have to wait
 we are using retry with exponential backoff + jitter
+
+
+Negative caching 
+if data does not exist on DB and malicous attacker request that data again and again 
+so cache will call DB and too many can hit
+so if the record is not found cache is as null
+so that it can directly return nil
+usually has low ttl like 5sec since the status of data might change
+like does not exist -> exist
+
+

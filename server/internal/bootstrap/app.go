@@ -16,10 +16,10 @@ type API struct {
 	ArticleHandler *handler.ArticleHandler
 }
 
-func InitWorker(db *gorm.DB) *Worker {
+func InitWorker(db *gorm.DB, redis *redis.Client) *Worker {
 	articlesRepo := repository.NewArticlesRepository(db)
 	techcrunchProvider := techcrunch.NewTechCrunch()
-	feedService := service.NewFeedSeervice(articlesRepo, techcrunchProvider)
+	feedService := service.NewFeedSeervice(articlesRepo, techcrunchProvider, redis)
 	return &Worker{
 		FeedService: feedService,
 	}

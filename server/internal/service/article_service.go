@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"math/rand"
 	"strconv"
@@ -11,7 +12,10 @@ import (
 	"github.com/jsndz/trending/internal/model"
 	"github.com/jsndz/trending/internal/repository"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
+
+const NotFound = "NOT_FOUND"
 
 type ArticleService struct {
 	ArticlesRepo *repository.ArticlesRepository
@@ -35,6 +39,9 @@ func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) (
 	offset := (page - 1) * limit
 	key := "articles:offset:" + strconv.Itoa(offset) + ":limit:" + strconv.Itoa(limit)
 	val, err := s.redis.Get(ctx, key).Result()
+	if val == NotFound {
+		return nil, gorm.ErrRecordNotFound
+	}
 	var articlesCache StoreData
 
 	if err == redis.Nil {
@@ -54,6 +61,20 @@ func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) (
 			if err != nil {
 				return nil, err
 			}
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				err := s.redis.Set(
+					ctx,
+					key,
+					NotFound,
+					5*time.Second,
+				).Err()
+
+				if err != nil {
+					return nil, err
+				}
+
+				return nil, gorm.ErrRecordNotFound
+			}
 			hasMore := len(articles) > limit
 
 			if hasMore {
@@ -67,7 +88,11 @@ func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) (
 			if err != nil {
 				return nil, err
 			}
-			if err := s.redis.Set(ctx, key, articlesJSON, time.Second*60).Err(); err != nil {
+			baseTTL := 60 * time.Second
+			jitter := time.Duration(rand.Intn(30)) * time.Second
+
+			ttl := baseTTL + jitter
+			if err := s.redis.Set(ctx, key, articlesJSON, ttl).Err(); err != nil {
 				return nil, err
 			}
 			return articles, nil

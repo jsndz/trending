@@ -52,3 +52,26 @@ Running 30s test @ http://localhost:8080/api/v1/articles
   612831 requests in 30.02s, 2.99GB read
 Requests/sec:  20410.78
 Transfer/sec:    102.08MB
+
+
+Now with Cache coalescing
+
+Running 30s test @ http://localhost:8080/api/v1/articles
+  4 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.86ms    3.03ms  90.33ms   83.18%
+    Req/Sec     4.34k   313.29     4.94k    86.00%
+  518324 requests in 30.02s, 2.53GB read
+Requests/sec:  17265.36
+Transfer/sec:     86.35MB
+
+The result may appear less this is because Cache coalescing adds overhead but the
+main need of this is to reduce load on DB
+
+
+
+TLL Jitter:
+
+Add jitter for expiry
+Many different keys
+expiring simultaneously
