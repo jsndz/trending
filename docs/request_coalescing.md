@@ -1,35 +1,22 @@
-package service
+cache stampede is when all the keys suddenly expire and all request suddenly hit the DB
+which can be very dangerous like if suddenly 1000 req hit DB
 
-import (
-	"context"
-	"encoding/json"
-	"log"
-	"math/rand"
-	"strconv"
-	"time"
+Request Coalescing solves this by allowing only ONE request fetches from DB
+others wait
 
-	"github.com/jsndz/trending/internal/model"
-	"github.com/jsndz/trending/internal/repository"
-	"github.com/redis/go-redis/v9"
-)
+so this can be achieved using redis set NX
+set when not exist 
+if the key for lock not exist set
+so that only one request can handle it 
+set the lock 
+make db query and cache is rebuild 
 
-type ArticleService struct {
-	ArticlesRepo *repository.ArticlesRepository
-	redis        *redis.Client
-}
+other req can use the same cache
 
-type StoreData struct {
-	Data       []model.Article `json:"data"`
-	NextOffset int             `json:"next_offset"`
-	HasMore    bool            `json:"has_more"`
-}
+dont forget to delete the lock  
 
-func NewArticleService(articleRepo *repository.ArticlesRepository, redis *redis.Client) *ArticleService {
-	return &ArticleService{
-		ArticlesRepo: articleRepo,
-		redis:        redis,
-	}
-}
+```go 
+
 
 func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) ([]model.Article, error) {
 	offset := (page - 1) * limit
@@ -92,3 +79,9 @@ func (s *ArticleService) GetArticles(ctx context.Context, page int, limit int) (
 	log.Println("cache hit", key)
 	return articlesCache.Data, nil
 }
+
+
+```
+
+when one request is doing the db request others have to wait
+we are using retry with exponential backoff + jitter
