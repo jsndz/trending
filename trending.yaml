@@ -30,3 +30,14 @@ tasks:
     dependsOn:
       - run.docker
     logRules: []
+  run.client:
+    folder: /home/jaison/code/projects/trending/client
+    command: npm run dev
+    type: service
+    ready:
+      kind: port
+      port: 5173
+    dependsOn:
+      - run.scheduler
+      - run.api
+    logRules: []

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { AlertCircle, TrendingUp, Frown } from 'lucide-react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { AlertCircle, TrendingUp, Frown, Loader2 } from 'lucide-react';
 import { useArticles } from '../hooks/useArticles';
 import { ArticleCard } from '../components/ArticleCard';
 import { Header } from '../components/Header';
@@ -7,9 +7,10 @@ import { FilterBar } from '../components/FilterBar';
 import { SkeletonCard } from '../components/SkeletonCard';
 
 export function ArticlesPage() {
-  const { articles, loading, error, refetch } = useArticles();
+  const { articles, loading, loadingMore, error, hasMore, refetch, loadMore } = useArticles();
   const [query, setQuery] = useState('');
   const [activeSource, setActiveSource] = useState('');
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   const sources = useMemo(
     () => Array.from(new Set(articles.map((a) => a.source))).sort(),
@@ -33,6 +34,23 @@ export function ArticlesPage() {
     }
     return result;
   }, [articles, query, activeSource]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, loadMore]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,8 +105,8 @@ export function ArticlesPage() {
           </div>
         )}
 
-        {/* Loading skeleton */}
-        {loading && (
+        {/* Loading skeleton (initial load) */}
+        {loading && articles.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 9 }).map((_, i) => (
               <SkeletonCard key={i} />
@@ -120,7 +138,7 @@ export function ArticlesPage() {
         )}
 
         {/* Article grid */}
-        {!loading && !error && filtered.length > 0 && (
+        {filtered.length > 0 && (
           <>
             <p className="text-xs text-gray-400 mb-4">
               Showing <span className="font-medium text-gray-600">{filtered.length}</span>
@@ -131,8 +149,25 @@ export function ArticlesPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map((article, i) => (
-                <ArticleCard key={article.id} article={article} index={i} />
+                <ArticleCard key={`${article.id}-${i}`} article={article} index={i} />
               ))}
+            </div>
+
+            {/* Load more sentinel */}
+            <div
+              ref={loaderRef}
+              className="mt-8 py-4 flex items-center justify-center gap-2 text-gray-500"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 size={20} className="animate-spin text-blue-600" />
+                  <span className="text-sm font-medium">Loading more articles...</span>
+                </>
+              ) : hasMore ? (
+                <span className="text-xs text-gray-400">Scroll down to see more</span>
+              ) : (
+                <span className="text-xs text-gray-400">You've reached the end of the feed</span>
+              )}
             </div>
           </>
         )}

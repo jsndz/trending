@@ -5,8 +5,10 @@ const api = axios.create({
   baseURL: 'http://localhost:8080',
 });
 
-export async function fetchArticles(): Promise<ArticlesResponse> {
-  const res = await api.get<ArticlesResponse>('/api/v1/articles');
+export async function fetchArticles(page: number = 1, limit: number = 20): Promise<ArticlesResponse> {
+  const res = await api.get<ArticlesResponse>('/api/v1/articles', {
+    params: { page, limit }
+  });
   console.log(res.data);
   return res.data;
 }

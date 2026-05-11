@@ -15,8 +15,9 @@ func NewArticleService(articleRepo *repository.ArticlesRepository) *ArticleServi
 	}
 }
 
-func (s *ArticleService) GetArticles() ([]model.Article, error) {
-	articles, err := s.ArticlesRepo.GetAll()
+func (s *ArticleService) GetArticles(page int, limit int) ([]model.Article, error) {
+
+	articles, err := s.ArticlesRepo.GetPaginated(limit, (page-1)*limit)
 	if err != nil {
 		return nil, err
 	}
